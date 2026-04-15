@@ -10,10 +10,19 @@ artifacts/
 cache/
 typechain-types/
 
+# Anchor / Rust build artifacts
+target/
+
 # Python
 __pycache__/
 *.pyc
 *.pyo
+
+# Runtime state + secrets
+scripts/.token.json
+ground_station/solana_state.json
+ground_station/reception_event.json
+solana-client/.env
 
 # Runtime
 

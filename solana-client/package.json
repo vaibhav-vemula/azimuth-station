@@ -1,0 +1,17 @@
+{
+  "name": "azimuth-solana-client",
+  "version": "1.0.0",
+  "description": "Azimuth ground station Solana client — heartbeats, proof submission, keeper bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.31.0",
+    "@irys/upload": "^0.0.15",
+    "@irys/upload-solana": "^0.0.15",
+    "@solana/spl-token": "^0.4.0",
+    "@solana/web3.js": "^1.95.0",
+    "dotenv": "^16.0.0"
+  }
+}
