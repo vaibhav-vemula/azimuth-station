@@ -27,3 +27,6 @@ Thumbs.db
 
 .claude
 .next
+
+# Git worktrees
+.worktrees/
