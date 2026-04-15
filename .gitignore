@@ -1,0 +1,29 @@
+# Environment & secrets
+.env
+.env.local
+
+# Node
+node_modules/
+
+# Hardhat
+artifacts/
+cache/
+typechain-types/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Runtime
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+.claude
+.next
