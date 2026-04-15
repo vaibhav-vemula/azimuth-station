@@ -6,8 +6,6 @@ A network of DePIN ground stations collaboratively receive satellite image trans
 
 ![Satellite Image](images/satimg.png)
 
-**Demo:** https://youtu.be/sN1ynR5zsPQ
-
 ---
 
 ## Table of Contents
@@ -46,59 +44,6 @@ A network of DePIN ground stations collaboratively receive satellite image trans
 5. **Coordinate** — The primary station polls Arweave/Irys GraphQL for peer packet announcements, fetches both datasets, merges packets into the best possible image, uploads to Arweave, and calls `recordImage()` on-chain
 6. **Settle** — A **keeper bot** (running on the Pi alongside the client) polls the on-chain epoch state and triggers `settlePoaEpoch` when the interval elapses, distributing AZM rewards to all qualifying stations via `remaining_accounts`
 7. **Earn** — AZM rewards land directly in each station's token account
-
----
-
-## Architecture
-
-```
-┌────────────────────┐   LoRa 915 MHz   ┌──────────────────────┐
-│  Heltec ESP32      │ ───────────────▶ │  Heltec ESP32         │
-│  (Satellite Sim)   │                  │  (LoRa-to-USB Bridge) │
-│  Broadcasts JPEG   │                  └─────────┬────────────┘
-│  104 LoRa packets  │                            USB Serial
-└────────────────────┘         ┌─────────────────┴────────────┐
-                                │  Ground Station (Pi / Mac)    │
-                                │  azimuth_station.py (Pygame)  │
-                                │  solana-client/index.js       │
-                                │    ├─ heartbeat.js            │
-                                │    ├─ proofSubmitter.js       │
-                                │    ├─ packetPublisher.js      │
-                                │    ├─ imageMerger.js          │
-                                │    ├─ keeper.js               │
-                                │    └─ statePoller.js          │
-                                └─────────────────┬────────────┘
-                                                  │
-                               ┌──────────────────┴───────────────────┐
-                               │            Solana Devnet              │
-                               │                                        │
-                               │   ┌────────────────────────────┐    │
-                               │   │     OrbitalVault (Anchor)   │    │
-                               │   │  PDA: ["vault_config"]       │    │
-                               │   │  • heartbeat()               │    │
-                               │   │  • submitPorx()              │    │
-                               │   │  • claimPorxReward()         │    │
-                               │   │  • verifyPorx()              │    │
-                               │   │  • executePorxPayout()       │    │
-                               │   │  • settlePoaEpoch()          │    │
-                               │   │  • recordImage()             │    │
-                               │   │  • registerStation()         │    │
-                               │   │  • requestUnstake()          │    │
-                               │   │  • executeUnstake()          │    │
-                               │   └────────────────────────────┘    │
-                               │                                        │
-                               │   ┌────────────────────────────┐    │
-                               │   │   AZM SPL Token             │    │
-                               │   │   Mint: set at init          │    │
-                               │   │   Held in vault ATA          │    │
-                               │   └────────────────────────────┘    │
-                               └──────────────────────────────────────┘
-                                                  │
-                                      Arweave (Irys devnet)
-                                   Permanent packet + image archive
-                                   Queried via Irys GraphQL
-```
-
 ---
 
 ## Program Accounts
