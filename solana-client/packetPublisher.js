@@ -1,5 +1,6 @@
 const { Uploader } = require("@irys/upload");
 const { Solana } = require("@irys/upload-solana");
+const bs58 = require("bs58");
 const { keypair } = require("./config");
 
 let irysClient = null;
@@ -7,7 +8,7 @@ let irysClient = null;
 async function getIrys() {
   if (irysClient) return irysClient;
   irysClient = await Uploader(Solana)
-    .withWallet(Buffer.from(keypair.secretKey).toString("hex"))
+    .withWallet(bs58.encode(keypair.secretKey))
     .withRpc(process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com")
     .devnet()
     .build();

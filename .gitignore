@@ -17,6 +17,7 @@ target/
 __pycache__/
 *.pyc
 *.pyo
+ground_station/venv/
 
 # Runtime state + secrets
 scripts/.token.json

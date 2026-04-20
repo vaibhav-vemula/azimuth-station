@@ -9,7 +9,7 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.0",
     "@irys/upload": "^0.0.15",
-    "@irys/upload-solana": "^0.0.15",
+    "@irys/upload-solana": "^0.1.8",
     "@solana/spl-token": "^0.4.0",
     "@solana/web3.js": "^1.95.0",
     "dotenv": "^16.0.0"

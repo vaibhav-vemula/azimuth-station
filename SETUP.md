@@ -9,14 +9,14 @@ This guide takes you from a clean machine to a fully running two-station Azimuth
 
 ## Prerequisites
 
-Install these tools before starting:
+### Mac (Station 1 — build machine)
 
 ```bash
 # 1. Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
-# 2. Solana CLI (Mac — use Homebrew if curl fails)
+# 2. Solana CLI
 brew install solana
 # or: sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
 
@@ -28,11 +28,33 @@ avm use 0.31.0
 # 4. Node.js >= 18
 node --version   # should print v18.x.x or later
 
-# Verify everything
+# Verify
 rustc --version        # rustc 1.x.x
 solana --version       # solana-cli 1.18.x
 anchor --version       # anchor-cli 0.31.0
 node --version         # v18.x.x
+```
+
+### Raspberry Pi (Station 2 — ARM64)
+
+The Pi only runs `solana-client` (Node.js). No Solana CLI, Rust, or Anchor needed —
+Agave v3.x has no Linux aarch64 binary. All keypair and registration steps run on Mac.
+
+```bash
+# 1. Update system
+sudo apt update && sudo apt upgrade -y
+
+# 2. Node.js 18 via nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+nvm install 18
+nvm use 18
+node --version         # v18.x.x
+
+# 3. Clone the repo
+git clone https://github.com/YOUR_REPO/azimuth-solana.git
+cd azimuth-solana/solana-client
+npm install
 ```
 
 ---
@@ -121,7 +143,7 @@ orbital_vault = "YOUR_PROGRAM_ID_HERE"
 declare_id!("YOUR_PROGRAM_ID_HERE");
 ```
 
-Build and deploy once:
+Build and deploy:
 ```bash
 solana config set --url devnet
 anchor build && anchor deploy
@@ -133,11 +155,11 @@ anchor build && anchor deploy
 
 AZM is the reward token distributed to stations for PoA heartbeats and PoRx proofs.
 
-Edit `scripts/.env` with your values:
+Edit `scripts/.env`:
 ```
 ANCHOR_PROVIDER_URL=https://api.devnet.solana.com
-ANCHOR_WALLET=/Users/vaibhav/.config/solana/devnet.json
-ORBITAL_VAULT_PROGRAM_ID=EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6
+ANCHOR_WALLET=~/.config/solana/id.json
+ORBITAL_VAULT_PROGRAM_ID=YOUR_PROGRAM_ID_HERE
 ```
 
 Then run:
@@ -154,7 +176,10 @@ Minted 1,000,000 AZM to vault
 Saved to scripts/.token.json
 ```
 
-This saves `scripts/.token.json` — keep it, the next step reads it.
+Add the printed mint address to `scripts/.env`:
+```
+AZM_MINT=<mint pubkey>
+```
 
 ---
 
@@ -173,81 +198,88 @@ Vault parameters:
 - **PoA epoch**: 10 minutes (demo — settles rewards every 10 min)
 - **PoA reward**: 2 AZM per epoch per qualifying station
 - **PoRx reward**: 1 AZM per received packet
-- **Stake**: 0.5 SOL per station (in lamports, paid from station wallet)
+- **Stake**: 0.5 SOL per station (paid from station wallet on registration)
 - **Unstake cooldown**: 7 days
 - **Heartbeat threshold**: 1 per epoch minimum
 
 ---
 
-## Step 7 — Create Station Keypairs
+## Step 7 — Create Station Keypairs (on Mac)
 
-Each station signs its own transactions and holds its own AZM rewards. Each also needs 0.5 SOL for staking plus extra for transaction fees — airdrop at least 1.5 SOL.
+Both keypairs are generated on Mac. The Pi has no Solana CLI.
+Each station needs 0.5 SOL for staking plus fees — airdrop at least 1.5 SOL each.
 
-**On Mac (Station 1):**
 ```bash
+# Station 1 (Mac)
 solana-keygen new --outfile ~/.config/solana/station1.json
-# Airdrop to station wallet
 solana airdrop 2 $(solana-keygen pubkey ~/.config/solana/station1.json)
 solana airdrop 2 $(solana-keygen pubkey ~/.config/solana/station1.json)
 solana balance $(solana-keygen pubkey ~/.config/solana/station1.json)
-```
 
-**On Raspberry Pi (Station 2):**
-```bash
+# Station 2 (Pi — generated on Mac)
 solana-keygen new --outfile ~/.config/solana/station2.json
 solana airdrop 2 $(solana-keygen pubkey ~/.config/solana/station2.json)
 solana airdrop 2 $(solana-keygen pubkey ~/.config/solana/station2.json)
 solana balance $(solana-keygen pubkey ~/.config/solana/station2.json)
+
+# Copy Station 2 keypair to Pi — cat on Mac, then run the printed command on Pi
+cat ~/.config/solana/station2.json
+# On Pi:
+mkdir -p ~/.config/solana
+cat > ~/.config/solana/station2.json << 'EOF'
+[37,235,100,100,213,70,216,23,240,75,197,238,214,202,77,78,116,81,182,123,59,243,72,103,3,96,63,165,163,62,249,159,95,67,60,120,17,49,187,35,31,103,35,56,128,174,133,77,30,6,33,136,138,148,127,197,204,237,63,140,39,195,134,179]
+EOF
 ```
 
 ---
 
-## Step 8 — Register Each Station
+## Step 8 — Register Both Stations (on Mac)
 
-Each machine registers itself. The script uses `ANCHOR_WALLET` as the station keypair and `STATION_LOCATION` as the display name.
+Both registrations run from the Mac in one command — the script needs
+`target/idl/orbital_vault.json` which only exists after `anchor build` on Mac.
 
-**On Mac** — `scripts/.env` should have:
+Add both keypair paths to `scripts/.env`:
 ```
-ANCHOR_WALLET=/Users/vaibhav/.config/solana/devnet.json   ← admin wallet
-STATION_KEYPAIR_PATH=~/.config/solana/station1.json
-STATION_LOCATION=Station 1 — Mac
+STATION1_KEYPAIR_PATH=~/.config/solana/station1.json
+STATION1_LOCATION=Station 1 — Mac
+STATION2_KEYPAIR_PATH=~/.config/solana/station2.json
+STATION2_LOCATION=Station 2 — Raspberry Pi
 ```
-Then run:
+
 ```bash
 node scripts/registerStation.js
 ```
 
-**On Raspberry Pi** — create `scripts/.env` on the Pi with:
-```
-ANCHOR_PROVIDER_URL=https://api.devnet.solana.com
-ANCHOR_WALLET=~/.config/solana/devnet.json   ← same admin wallet (copy to Pi or use Pi admin)
-ORBITAL_VAULT_PROGRAM_ID=YOUR_PROGRAM_ID_HERE
-STATION_KEYPAIR_PATH=~/.config/solana/station2.json
-STATION_LOCATION=Station 2 — Raspberry Pi
-```
-Then run:
-```bash
-node scripts/registerStation.js
-```
-
-Expected output (each machine):
+Expected output:
 ```
 Registered: Station 1 — Mac
-  Pubkey: <station pubkey>
-  PDA:    <station pda>
+  Pubkey: <station1 pubkey>
+  PDA:    <station1 pda>
+Registered: Station 2 — Raspberry Pi
+  Pubkey: <station2 pubkey>
+  PDA:    <station2 pda>
 ```
 
 ---
 
 ## Step 9 — Configure solana-client
 
-**On Mac:**
+The Pi needs the compiled IDL file (not committed to git). Copy it by pasting:
+
+On Mac, print the IDL:
 ```bash
-cd solana-client
-npm install
+cat target/idl/orbital_vault.json
 ```
 
-Create `solana-client/.env` on Mac:
+On Pi, paste the output:
+```bash
+mkdir -p ~/azimuth-solana/target/idl
+cat > ~/azimuth-solana/target/idl/orbital_vault.json << 'EOF'
+<paste contents here>
+EOF
+```
+
+**On Mac** — create `solana-client/.env`:
 ```
 SOLANA_RPC_URL=https://api.devnet.solana.com
 ORBITAL_VAULT_PROGRAM_ID=YOUR_PROGRAM_ID_HERE
@@ -260,13 +292,12 @@ IS_PRIMARY=true
 IRYS_NODE=https://devnet.irys.xyz
 ```
 
-**On Raspberry Pi:**
 ```bash
-cd solana-client
-npm install
+cd solana-client && npm install
+node index.js
 ```
 
-Create `solana-client/.env` on Pi:
+**On Raspberry Pi** — create `solana-client/.env`:
 ```
 SOLANA_RPC_URL=https://api.devnet.solana.com
 ORBITAL_VAULT_PROGRAM_ID=YOUR_PROGRAM_ID_HERE
@@ -279,7 +310,6 @@ IS_PRIMARY=false
 IRYS_NODE=https://devnet.irys.xyz
 ```
 
-Start on each machine:
 ```bash
 node index.js
 ```
@@ -294,7 +324,6 @@ You should see heartbeat confirmations every 60 seconds and the keeper bot polli
 
 ```bash
 cd dashboard
-npm install @solana/web3.js @coral-xyz/anchor @solana/spl-token
 npm install
 ```
 
@@ -308,7 +337,6 @@ NEXT_PUBLIC_AZM_MINT=<mint pubkey from scripts/.token.json>
 ```bash
 npm run dev
 # Open http://localhost:3000
-# Paste a station pubkey into the address bar to view its stats
 ```
 
 ### Image Archive Dashboard (Mac)
@@ -425,8 +453,8 @@ Check the station dashboard at `http://localhost:3000` — AZM balance should in
 | `Program not found` | Program ID in `Anchor.toml` / `lib.rs` doesn't match — re-check Step 4 |
 | `Account not found` | Vault not initialized — run Step 6 |
 | `scripts/.token.json not found` | Run Step 5 before Step 6 |
-| `ANCHOR_WALLET not set` | Export the env vars shown in Step 5 |
-| `Cannot find module '../target/types/orbital_vault'` | Run `anchor build` first |
+| `ANCHOR_WALLET not set` | Check `scripts/.env` has `ANCHOR_WALLET` set |
+| `Cannot find module '../target/idl/orbital_vault'` | Run `anchor build` on Mac; scp IDL to Pi (Step 9) |
 | Station has insufficient funds on register | Station wallet needs > 0.5 SOL — re-do Step 7 airdrops |
 | Heartbeat loop not confirming | Station not registered — re-check Step 8 |
-| `scp` fails for Pi keypair | Check Pi IP, SSH is enabled (`sudo raspi-config`) |
+| `scp` fails | Check Pi IP, SSH is enabled (`sudo raspi-config → Interface Options → SSH`) |

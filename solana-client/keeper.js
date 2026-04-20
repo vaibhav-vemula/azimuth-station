@@ -1,6 +1,6 @@
 const { PublicKey } = require("@solana/web3.js");
-const { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } = require("@solana/spl-token");
-const { program, keypair, vaultConfigPda, programId, azmMint } = require("./config");
+const { getAssociatedTokenAddressSync, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID } = require("@solana/spl-token");
+const { program, keypair, connection, vaultConfigPda, programId, azmMint } = require("./config");
 
 let keeperTimer = null;
 
@@ -26,6 +26,8 @@ async function checkPoaEpoch() {
 
     for (const stationKey of cfg.stationList) {
       const stationPda = stationPdaFor(stationKey);
+      // Ensure the station's AZM ATA exists before settling (token transfer will fail otherwise)
+      await getOrCreateAssociatedTokenAccount(connection, keypair, azmMint, stationKey, false);
       const stationAta = getAssociatedTokenAddressSync(azmMint, stationKey, false);
       remainingAccounts.push({ pubkey: stationPda, isSigner: false, isWritable: true });
       remainingAccounts.push({ pubkey: stationAta, isSigner: false, isWritable: true });
@@ -38,6 +40,7 @@ async function checkPoaEpoch() {
     console.log(`[KEEPER] PoA epoch settled — TX: ${sig}`);
   } catch (err) {
     console.error(`[KEEPER] PoA settle error: ${err.message}`);
+    if (err.logs) console.error("[KEEPER] Logs:", err.logs.join("\n"));
   }
 }
 

@@ -10,28 +10,8 @@ function loadKeypair(envPath) {
   );
 }
 
-async function main() {
-  // ANCHOR_WALLET = admin authority (pays for account rent, signs as authority)
-  const provider = anchor.AnchorProvider.env();
-  anchor.setProvider(provider);
-
-  const program = new anchor.Program(idl, provider);
-  const programId = program.programId;
-  const authority = provider.wallet.publicKey;
-
-  // STATION_KEYPAIR_PATH = this machine's station wallet (signs + stakes 0.5 SOL)
-  const stationKeyPath = process.env.STATION_KEYPAIR_PATH;
-  if (!stationKeyPath) {
-    console.error("Set STATION_KEYPAIR_PATH in scripts/.env");
-    process.exit(1);
-  }
-  const stationKeypair = loadKeypair(stationKeyPath);
+async function registerOne(program, programId, vaultConfigPda, authority, stationKeypair, location) {
   const stationPubkey = stationKeypair.publicKey;
-  const location = process.env.STATION_LOCATION || "Station";
-
-  const [vaultConfigPda] = anchor.web3.PublicKey.findProgramAddressSync(
-    [Buffer.from("vault_config")], programId
-  );
   const [stationPda] = anchor.web3.PublicKey.findProgramAddressSync(
     [Buffer.from("station"), stationPubkey.toBuffer()], programId
   );
@@ -47,6 +27,33 @@ async function main() {
   console.log(`Registered: ${location}`);
   console.log(`  Pubkey: ${stationPubkey.toBase58()}`);
   console.log(`  PDA:    ${stationPda.toBase58()}`);
+}
+
+async function main() {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  const program = new anchor.Program(idl, provider);
+  const programId = program.programId;
+  const authority = provider.wallet.publicKey;
+
+  const [vaultConfigPda] = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("vault_config")], programId
+  );
+
+  const stations = [
+    { path: process.env.STATION1_KEYPAIR_PATH, location: process.env.STATION1_LOCATION || "Station 1 — Mac" },
+    { path: process.env.STATION2_KEYPAIR_PATH, location: process.env.STATION2_LOCATION || "Station 2 — Raspberry Pi" },
+  ].filter(s => s.path);
+
+  if (stations.length === 0) {
+    console.error("Set STATION1_KEYPAIR_PATH and/or STATION2_KEYPAIR_PATH in scripts/.env");
+    process.exit(1);
+  }
+
+  for (const { path, location } of stations) {
+    await registerOne(program, programId, vaultConfigPda, authority, loadKeypair(path), location);
+  }
 }
 
 main().catch(console.error);
