@@ -20,6 +20,7 @@ __pycache__/
 
 # Runtime state + secrets
 scripts/.token.json
+scripts/.env
 ground_station/solana_state.json
 ground_station/reception_event.json
 solana-client/.env

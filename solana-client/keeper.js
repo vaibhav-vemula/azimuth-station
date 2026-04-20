@@ -83,11 +83,8 @@ async function checkUnstakes() {
       if (account.active || !account.registered || account.unstakeAt.toNumber() === 0) continue;
       if (now < account.unstakeAt.toNumber()) continue;
 
-      // authority is stored in Station.authority (Pubkey field added for exactly this purpose)
       const stationAuthority = account.authority;
       const staPda = stationPdaFor(stationAuthority);
-      const stationAta = getAssociatedTokenAddressSync(azmMint, stationAuthority, false);
-      const vaultAta = getAssociatedTokenAddressSync(azmMint, vaultConfigPda, true);
 
       try {
         const sig = await program.methods.executeUnstake()
@@ -95,9 +92,6 @@ async function checkUnstakes() {
             vaultConfig: vaultConfigPda,
             station: staPda,
             stationAuthority,
-            vaultAta,
-            stationAta,
-            tokenProgram: TOKEN_PROGRAM_ID,
           }).rpc();
         console.log(`[KEEPER] Unstake executed for ${stationAuthority.toBase58().slice(0,8)}... — TX: ${sig}`);
       } catch (err) {

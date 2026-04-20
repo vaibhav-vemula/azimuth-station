@@ -1,3 +1,4 @@
+#![allow(deprecated)]
 use anchor_lang::prelude::*;
 
 pub mod errors;
@@ -6,7 +7,7 @@ pub mod state;
 
 use instructions::*;
 
-declare_id!("8aor5jUiu4irhm6MKjWSXTPq8JECXwZY4oJjRxSAuGPr");
+declare_id!("EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6");
 
 #[program]
 pub mod orbital_vault {

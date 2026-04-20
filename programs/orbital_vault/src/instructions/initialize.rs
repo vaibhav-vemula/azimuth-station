@@ -17,8 +17,7 @@ pub struct Initialize<'info> {
     pub vault_config: Account<'info, VaultConfig>,
 
     #[account(
-        init,
-        payer = authority,
+        mut,
         associated_token::mint = azm_mint,
         associated_token::authority = vault_config,
     )]

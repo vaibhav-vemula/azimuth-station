@@ -41,12 +41,12 @@ describe("orbital_vault", () => {
 
   it("initializes vault", async () => {
     await program.methods.initialize(
-      new anchor.BN(300),   // epoch interval 5 min
-      new anchor.BN(2),     // poa reward
-      new anchor.BN(1),     // porx base reward
-      new anchor.BN(100),   // stake amount
+      new anchor.BN(600),            // epoch interval 10 min
+      new anchor.BN(2),              // poa reward
+      new anchor.BN(1),              // porx base reward
+      new anchor.BN(500_000_000),    // 0.5 SOL stake
       new anchor.BN(7 * 24 * 3600), // unstake cooldown
-      new anchor.BN(1)      // heartbeat threshold
+      new anchor.BN(1)               // heartbeat threshold
     ).accounts({
       vaultConfig: vaultConfigPda,
       vaultAta: vaultAtaPda,

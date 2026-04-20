@@ -10,7 +10,7 @@ pub struct VaultConfig {
     pub poa_epoch_interval: i64,
     pub poa_reward_amount: u64,
     pub porx_base_reward: u64,
-    pub stake_amount: u64,
+    pub stake_amount: u64,        // lamports (0.5 SOL = 500_000_000)
     pub unstake_cooldown: i64,
     pub heartbeat_threshold: u64,
     pub station_list: Vec<Pubkey>,
@@ -21,13 +21,13 @@ impl VaultConfig {
     pub const LEN: usize = 8      // discriminator
         + 32 + 32 + 32            // authority, azm_mint, vault_ata
         + 8 + 8 + 8               // epoch_count, epoch_start, epoch_interval
-        + 8 + 8 + 8 + 8 + 8      // reward amounts + stake + cooldown + threshold
+        + 8 + 8 + 8 + 8 + 8      // rewards, stake, cooldown, threshold
         + 4 + (32 * Self::MAX_STATIONS); // station_list vec
 }
 
 #[account]
 pub struct Station {
-    pub authority: Pubkey,       // station wallet — stored so keeper can find it
+    pub authority: Pubkey,
     pub registered: bool,
     pub active: bool,
     pub location: String,
@@ -118,3 +118,4 @@ pub struct ImageMerged { pub pass_id: [u8; 32], pub arweave_tx_id: String, pub s
 
 #[event]
 pub struct Slashed { pub station: Pubkey, pub amount: u64, pub reason: String }
+

@@ -1,3 +1,5 @@
+#![allow(ambiguous_glob_reexports)]
+
 pub mod admin;
 pub mod cancel_unstake;
 pub mod claim_porx_reward;

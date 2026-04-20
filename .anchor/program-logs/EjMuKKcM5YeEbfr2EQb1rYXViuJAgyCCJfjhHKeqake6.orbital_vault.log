@@ -1,0 +1,30 @@
+Streaming transaction logs mentioning EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6. Confirmed commitment
+Transaction executed in slot 6:
+  Signature: 34uZtEeHPb2jy6DpPWdUEmLqkBAdjR57Hsi5cVVJNyPgfCcYAdxt6Sb3PcJokETjTHeifsmWdzKDWjKZkmxeStk9
+  Status: Ok
+  Log Messages:
+    Program EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6 invoke [1]
+    Program log: Instruction: Initialize
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6 consumed 12672 of 200000 compute units
+    Program EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6 success
+Transaction executed in slot 7:
+  Signature: 34uZtEeHPb2jy6DpPWdUEmLqkBAdjR57Hsi5cVVJNyPgfCcYAdxt6Sb3PcJokETjTHeifsmWdzKDWjKZkmxeStk9
+  Status: Ok
+  Log Messages:
+    Program EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6 invoke [1]
+    Program log: Instruction: Initialize
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6 consumed 12672 of 200000 compute units
+    Program EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6 success
+Transaction executed in slot 7:
+  Signature: 43qDYMtGETNtdDUoG3D5hjjCP6QB2do6WhcPPWUAHZqZYzuYWery2rEADiw1nxupmxgdb46Gxi4pmTEpbCMfVR8C
+  Status: Error processing Instruction 0: custom program error: 0xbc4
+  Log Messages:
+    Program EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6 invoke [1]
+    Program log: Instruction: Heartbeat
+    Program log: AnchorError caused by account: station. Error Code: AccountNotInitialized. Error Number: 3012. Error Message: The program expected this account to be already initialized.
+    Program EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6 consumed 2472 of 200000 compute units
+    Program EjMuKKcM5YeEbfr2EQb1rYXViuJAgyCCJfjhHKeqake6 failed: custom program error: 0xbc4
